@@ -10,3 +10,4 @@
 *.egg-info/*
 docs/_build/*
 dist/*
+*.sqlite3

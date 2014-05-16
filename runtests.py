@@ -14,10 +14,20 @@ if not settings.configured:
             }
         },
         INSTALLED_APPS=(
+            'django.contrib.auth',
+            'django.contrib.contenttypes',
+            'django.contrib.sessions',
+            'django.contrib.admin',
+            'klingon.tests.testapp',
             'klingon',
         ),
         SITE_ID=1,
         SECRET_KEY='this-is-just-for-tests-so-not-that-secret',
+        LANGUAGES = (
+            ('en', 'English'),
+            ('pt_br', 'Brazilian Portuguese'),
+            ('es', 'Spanish'),
+        ),
     )
 
 
