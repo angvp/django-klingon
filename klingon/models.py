@@ -1,9 +1,10 @@
 from django.conf import settings
 from django.core import urlresolvers
 from django.core.cache import cache
-from django.db import models
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.generic import GenericForeignKey
+from django.db import models
+from django.utils.translation import ugettext as _
 
 
 class Translation(models.Model):
@@ -175,8 +176,8 @@ class Translatable(object):
         # Do not allow user to set a translations in the default language
         if lang == self._get_default_language():
             raise CanNotTranslate(
-                'You are not supposed to translate the default language. '\
-                'Use the model fields for translations in default language'
+                _('You are not supposed to translate the default language. '\
+                'Use the model fields for translations in default language')
             )
         # Get translation, if it does not exits create one
         trans_obj = self.get_translation_obj(lang, field, create=True)
