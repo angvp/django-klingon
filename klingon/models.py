@@ -77,6 +77,27 @@ class Translatable(object):
             lang=lang
         )
 
+    def translations(self, lang):
+        """
+        Return the list of translation strings of a Translatable
+        instance in a dictionary form
+
+        @type lang: string
+        @param lang: a string with the name of the language
+
+        @rtype: python Dictionary
+        @return: Returns a all fieldname / translations (key / value)
+        """
+        key = self._get_translations_cache_key(lang)
+        trans_dict = cache.get(key, {})
+        if not trans_dict:
+            for field in self.translatable_fields:
+                # we use get_translation method to be sure that it will
+                # fall back and get the default value if needed
+                trans_dict[field] = self.get_translation(lang, field)
+            cache.set(key, trans_dict)
+        return trans_dict
+
     def get_translation_obj(self, lang, field, create=False):
         """
         Return the translation object of an specific field in a Translatable
@@ -108,17 +129,6 @@ class Translatable(object):
                         field=field,
                     )
         return trans
-
-    def _get_default_language(self):
-        """
-        Helper function to get defaul setting for klingon.
-        This is not set at module level to make it easy to test
-        """
-        return getattr(settings, 'KLINGON_DEFAULT_LANGUAGE', '')
-
-    def _get_translation_cache_key(self, lang, field):
-        content_type = self._meta.object_name
-        return '%s:%s:%s:%s' % (content_type, self.id, lang, field)
 
     def get_translation(self, lang, field):
         """
@@ -172,9 +182,11 @@ class Translatable(object):
         trans_obj = self.get_translation_obj(lang, field, create=True)
         trans_obj.translation = text
         trans_obj.save()
-        # Update cache
+        # Update cache for this specif translations
         key = self._get_translation_cache_key(lang, field)
         cache.set(key, text)
+        # remove cache for translations dict
+        cache.delete(self._get_translations_cache_key(lang))
         return trans_obj
 
     def translations_link(self):
@@ -194,3 +206,18 @@ class Translatable(object):
         return '<a href="%s">translate</a>' % link
     translations_link.allow_tags = True
     translations_link.short_description = 'Translations'
+
+    def _get_default_language(self):
+        """
+        Helper function to get defaul setting for klingon.
+        This is not set at module level to make it easy to test
+        """
+        return getattr(settings, 'KLINGON_DEFAULT_LANGUAGE', '')
+
+    def _get_translations_cache_key(self, lang):
+        content_type = self._meta.object_name
+        return '%s:%s:%s' % (content_type, self.id, lang)
+
+    def _get_translation_cache_key(self, lang, field):
+        content_type = self._meta.object_name
+        return '%s:%s:%s:%s' % (content_type, self.id, lang, field)
