@@ -10,7 +10,6 @@ class Book(models.Model, Translatable):
     description = models.TextField()
     publication_date = models.DateField()
 
-    # Optional attribute to use with translate() method
     translatable_fields = ('title', 'description')
 
     def __unicode__(self):
