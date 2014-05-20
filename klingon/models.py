@@ -13,7 +13,7 @@ class Translation(models.Model):
     content_type = models.ForeignKey(ContentType)
     object_id = models.PositiveIntegerField()
     content_object = GenericForeignKey()
-    lang = models.CharField(max_length=3, db_index=True)
+    lang = models.CharField(max_length=5, db_index=True)
     field = models.CharField(max_length=255, db_index=True)
     translation = models.TextField(blank=True, null=True)
 
