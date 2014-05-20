@@ -34,6 +34,13 @@ class TranslationAPITestCase(TestCase):
             self.book.get_translation('es', 'description'),
             self.es_description
         )
+        self.assertEquals(
+            self.book.translations('es'),
+            {
+                'title': self.es_title,
+                'description': self.es_description,
+            }
+        )
 
     def test_api_default_value(self):
         self.assertEquals(
@@ -71,6 +78,33 @@ class TranslationAPITestCase(TestCase):
         self.assertEquals(
             es_title,
             self.es_title
+        )
+
+    def test_translations(self):
+        # translate book to spanish
+        self.book.set_translation('es', 'title', self.es_title)
+        self.book.set_translation('es', 'description', self.es_description)
+        # get all spanish translations for the book
+        self.assertEquals(
+            self.book.translations('es'),
+            {'title': self.es_title, 'description': self.es_description}
+        )
+
+    def test_translations_cache(self):
+        # translate book to spanish
+        self.book.set_translation('es', 'title', self.es_title)
+        self.book.set_translation('es', 'description', self.es_description)
+        # get translations
+        trans = self.book.translations('es')
+        # set a new translation
+        es_new_title = 'El Cuervo (*)'
+        self.book.set_translation('es', 'title', es_new_title)
+        # get new translations
+        new_trans = self.book.translations('es')
+        self.assertNotEquals(trans, new_trans)
+        self.assertEquals(
+            new_trans,
+            {'title': es_new_title, 'description': self.es_description}
         )
 
     @override_settings(KLINGON_DEFAULT_LANGUAGE='en')
