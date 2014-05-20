@@ -12,11 +12,13 @@ Setup & Integration
 In your settings files:
 add django-klingon to INSTALLED_APPS:
 
+```
     INSTALLED_APPS = (
         ...
         'klingon',
         ...
     )
+```
 
 specify a default language if you want to use your fields to store the
 default language:
@@ -27,10 +29,12 @@ Extend you models to add API support:
 first add Translatable to your model Class definition. This will add the
 API functions
 
+```
     from klingon.models import Translatable
     ...
     class Book(models.Model, Translatable):
     ...
+```
 
 in the same model add an attribute to indicate which fields will be
 translatables:
