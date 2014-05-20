@@ -1,8 +1,10 @@
 import datetime
 from django.conf import settings
+from django.core.cache import cache
 from django.test import TestCase
+from django.test.utils import override_settings
 from testapp.models import Book
-from klingon.models import Translation
+from klingon.models import Translation, CanNotTranslate
 
 
 class TranslationAPITestCase(TestCase):
@@ -14,6 +16,10 @@ class TranslationAPITestCase(TestCase):
         )
         self.es_title = 'El Cuervo'
         self.es_description = 'El Cuervo es un poema narrativo'
+
+    def tearDown(self):
+        # Remove cache after each test
+        cache.clear()
 
     def test_api_general_usage(self):
         # translate book to spanish
@@ -67,4 +73,47 @@ class TranslationAPITestCase(TestCase):
             self.es_title
         )
 
+    @override_settings(KLINGON_DEFAULT_LANGUAGE='en')
+    def test_create_translations_with_default_language(self):
+        self.book.translate()
+        self.assertEquals(
+            len(Translation.objects.all()),
+            (len(settings.LANGUAGES)-1)*len(self.book.translatable_fields)
+        )
+        # nothing should happen if you run translate tiwce
+        self.book.translate()
+        self.assertEquals(
+            len(Translation.objects.all()),
+            (len(settings.LANGUAGES)-1)*len(self.book.translatable_fields),
+        )
 
+    @override_settings(KLINGON_DEFAULT_LANGUAGE='en')
+    def test_get_translation_with_default_language(self):
+        es_title = self.book.get_translation('es', 'title')
+        # Get should not create empty translations
+        self.assertEquals(Translation.objects.count(), 0)
+        # Get should fall back to default language
+        self.assertEquals(es_title, self.book.title)
+
+    @override_settings(KLINGON_DEFAULT_LANGUAGE='en')
+    def test_set_translation_with_default_language(self):
+        # Verify that there are no translations
+        self.assertEquals(Translation.objects.count(), 0)
+        # Create a translation
+        self.book.set_translation('es', 'title', self.es_title)
+        # Get should work as expected
+        self.assertEquals(
+            self.es_title,
+            self.book.get_translation('es', 'title')
+        )
+        # Verify that only one translation was created
+        self.assertEquals(Translation.objects.count(), 1)
+
+    @override_settings(KLINGON_DEFAULT_LANGUAGE='en')
+    def test_set_translation_in_default_language(self):
+        # Create a translation for default language
+        self.assertRaises(
+            CanNotTranslate,
+            self.book.set_translation,
+            'en', 'title', 'The Raven!'
+        )

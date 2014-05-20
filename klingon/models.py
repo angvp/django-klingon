@@ -25,6 +25,10 @@ class Translation(models.Model):
         return u'%s : %s : %s' % (self.content_object, self.lang, self.field)
 
 
+class CanNotTranslate(Exception):
+    pass
+
+
 class Translatable(object):
     """
     Make your model extend this class to enable this API in you model instance
@@ -41,6 +45,11 @@ class Translatable(object):
         """
         translations = []
         for lang in settings.LANGUAGES:
+            # do not create an translations for default language.
+            # we will use the original model for this
+            if lang[0] == self._get_default_language():
+                continue
+            # create translations for all fields of each language
             for field in self.translatable_fields:
                 trans, created = Translation.objects.get_or_create(
                     object_id=self.id,
@@ -51,7 +60,7 @@ class Translatable(object):
                 translations.append(trans)
         return translations
 
-    def translations(self, lang):
+    def translations_objects(self, lang):
         """
         Return the complete list of translation objects of a Translatable
         instance
@@ -68,7 +77,7 @@ class Translatable(object):
             lang=lang
         )
 
-    def get_translation_obj(self, lang, field):
+    def get_translation_obj(self, lang, field, create=False):
         """
         Return the translation object of an specific field in a Translatable
         istance
@@ -82,13 +91,30 @@ class Translatable(object):
         @rtype: Translation
         @return: Returns a translation object
         """
-        trans, created = Translation.objects.get_or_create(
-                object_id=self.id,
-                content_type=ContentType.objects.get_for_model(self),
-                lang=lang,
-                field=field,
-            )
+        trans = None
+        try:
+            trans = Translation.objects.get(
+                    object_id=self.id,
+                    content_type=ContentType.objects.get_for_model(self),
+                    lang=lang,
+                    field=field,
+                )
+        except Translation.DoesNotExist:
+            if create:
+                trans = Translation.objects.create(
+                        object_id=self.id,
+                        content_type=ContentType.objects.get_for_model(self),
+                        lang=lang,
+                        field=field,
+                    )
         return trans
+
+    def _get_default_language(self):
+        """
+        Helper function to get defaul setting for klingon.
+        This is not set at module level to make it easy to test
+        """
+        return getattr(settings, 'KLINGON_DEFAULT_LANGUAGE', '')
 
     def _get_translation_cache_key(self, lang, field):
         content_type = self._meta.object_name
@@ -136,7 +162,14 @@ class Translatable(object):
         @type text: string
         @param text: a string to be stored as translation of the field
         """
-        trans_obj = self.get_translation_obj(lang, field)
+        # Do not allow user to set a translations in the default language
+        if lang == self._get_default_language():
+            raise CanNotTranslate(
+                'You are not supposed to translate the default language. '\
+                'Use the model fields for translations in default language'
+            )
+        # Get translation, if it does not exits create one
+        trans_obj = self.get_translation_obj(lang, field, create=True)
         trans_obj.translation = text
         trans_obj.save()
         # Update cache
