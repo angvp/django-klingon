@@ -37,9 +37,9 @@ from django.test.utils import get_runner
 def runtests():
     if hasattr(django, 'setup'):
         django.setup()
-    apps = sys.argv[1:] or ['klingon', ]
     TestRunner = get_runner(settings)
     test_runner = TestRunner(verbosity=1, interactive=True, failfast=False)
+    apps = ['klingon', ]
     failures = test_runner.run_tests(apps)
     sys.exit(failures)
 
