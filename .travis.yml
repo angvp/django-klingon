@@ -1,24 +1,15 @@
 language: python
-
 python:
   - "2.7"
-
 env:
-  - TOXENV=py27-1.4.X
-  - TOXENV=py27-1.5.X,py32-1.5.X
-  - TOXENV=py27-1.6.X,py32-1.6.X
-  - TOXENV=py27-1.7.X,py32-1.7.X
-
+  - DJANGO=1.5
+  - DJANGO=1.6.4
 install:
-  - pip install tox
-
+  - pip install -q Django==$DJANGO --use-mirrors
+  - pip install -q nose django-nose --use-mirrors
+  - pip install -q coverage coveralls --use-mirrors
+  - pip install -e . --use-mirrors
 script:
-    - tox
-
-branches:
-  only:
-    - master
-
-matrix:
-  allow_failures:
-    - env: TOXENV=py27-1.7.X,py32-1.7.X
+  - coverage run --source klingon setup.py test
+after_success:
+  - coveralls
