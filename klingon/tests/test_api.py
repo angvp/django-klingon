@@ -3,7 +3,7 @@ from django.conf import settings
 from django.core.cache import cache
 from django.test import TestCase
 from django.test.utils import override_settings
-from testapp.models import Book
+from testapp.models import Book, Library
 from klingon.models import Translation, CanNotTranslate
 
 
@@ -150,4 +150,24 @@ class TranslationAPITestCase(TestCase):
             CanNotTranslate,
             self.book.set_translation,
             'en', 'title', 'The Raven!'
+        )
+
+
+class AutomaticTranslationAPITestCase(TestCase):
+    def setUp(self):
+        self.library = Library.objects.create(
+            name="Indepent",
+            description="All in ebooks",
+        )
+        self.es_name = 'Independiente'
+        self.es_description = 'Todo en ebooks'
+
+    def tearDown(self):
+        # Remove cache after each test
+        cache.clear()
+
+    def test_translation_created_automatically(self):
+        self.assertEquals(
+            len(Translation.objects.all()),
+            len(settings.LANGUAGES*len(self.library.translatable_fields)),
         )
