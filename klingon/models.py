@@ -222,3 +222,13 @@ class Translatable(object):
     def _get_translation_cache_key(self, lang, field):
         content_type = self._meta.object_name
         return '%s:%s:%s:%s' % (content_type, self.id, lang, field)
+
+
+class AutomaticTranslation(Translatable):
+    """
+    Model that automatically crates translations
+    """
+    def save(self, *args, **kwargs):
+        res = super(AutomaticTranslation, self).save(*args, **kwargs)
+        self.translate()
+        return res
