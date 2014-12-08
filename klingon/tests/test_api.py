@@ -3,7 +3,7 @@ from django.conf import settings
 from django.core.cache import cache
 from django.test import TestCase
 from django.test.utils import override_settings
-from testapp.models import Book, Library
+from .testapp.models import Book, Library
 from klingon.models import Translation, CanNotTranslate
 
 

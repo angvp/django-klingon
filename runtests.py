@@ -28,6 +28,7 @@ if not settings.configured:
             ('pt_br', 'Brazilian Portuguese'),
             ('es', 'Spanish'),
         ),
+        MIDDLEWARE_CLASSES=(),
     )
 
 
