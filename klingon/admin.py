@@ -4,7 +4,7 @@ from django.contrib.contenttypes.generic import GenericTabularInline
 from django.forms.models import ModelForm
 from django.utils.translation import ugettext as _
 
-from models import Translation
+from .models import Translation
 
 
 class TranslationAdmin(admin.ModelAdmin):

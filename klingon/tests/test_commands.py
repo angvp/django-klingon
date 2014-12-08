@@ -4,7 +4,7 @@ from django.core.cache import cache
 from django.core.management import call_command
 from django.core.management.base import CommandError
 from django.test import TestCase
-from testapp.models import Book
+from .testapp.models import Book
 from klingon.models import Translation
 
 
