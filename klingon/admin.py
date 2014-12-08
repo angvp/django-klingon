@@ -22,8 +22,27 @@ create_translations.short_description = _('Create translations for selected obje
 
 
 class TranslationInlineForm(ModelForm):
+    widgets = {
+        'CharField': forms.TextInput(),
+        'TextField': forms.Textarea(),
+    }
+
     class Meta:
         model = Translation
+
+    def __init__(self, *args, **kwargs):
+       res = super(TranslationInlineForm, self).__init__(*args, **kwargs)
+       # overwrite the widgets for each form instance depending on the object and widget dict
+       if self.widgets and self.instance and hasattr(self.instance, 'content_type'):
+           model = self.instance.content_type.model_class()
+           field = model._meta.get_field(self.instance.field)
+           # get widget for field if any
+           widget = self.widgets.get(field.get_internal_type())
+           if widget:
+               translation = self.fields['translation']
+               # overwrite widget to field
+               translation.widget = widget
+       return res
 
     def clean_translation(self):
         """
