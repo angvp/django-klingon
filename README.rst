@@ -1,6 +1,13 @@
 klingon
 ========================
 
+
+.. image:: https://coveralls.io/repos/RouteAtlas/django-klingon/badge.png?branch=master
+  :target: https://coveralls.io/r/RouteAtlas/django-klingon?branch=master
+
+.. image:: https://travis-ci.org/RouteAtlas/django-klingon.svg?branch=master
+  :target: http://travis-ci.org/RouteAtlas/django-klingon
+
 Welcome to the documentation for django-klingon!
 
 django-klingon is an attempt to make django model translations suck
