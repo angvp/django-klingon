@@ -36,6 +36,7 @@ class Translatable(object):
     instances.
     """
     translatable_fields = ()
+    translatable_slug = None
 
     def translate(self):
         """
@@ -51,6 +52,10 @@ class Translatable(object):
             if lang[0] == self._get_default_language():
                 continue
             # create translations for all fields of each language
+            if self.translatable_slug is not None:
+                if self.translatable_slug not in self.translatable_fields:
+                    self.translatable_fields = self.translatable_fields + (self.translatable_slug,)
+
             for field in self.translatable_fields:
                 trans, created = Translation.objects.get_or_create(
                     object_id=self.id,
@@ -59,6 +64,7 @@ class Translatable(object):
                     lang=lang[0],
                 )
                 translations.append(trans)
+
         return translations
 
     def translations_objects(self, lang):
@@ -91,11 +97,17 @@ class Translatable(object):
         """
         key = self._get_translations_cache_key(lang)
         trans_dict = cache.get(key, {})
+
+        if self.translatable_slug is not None:
+            if self.translatable_slug not in self.translatable_fields:
+                self.translatable_fields = self.translatable_fields + (self.translatable_slug,)
+
         if not trans_dict:
             for field in self.translatable_fields:
                 # we use get_translation method to be sure that it will
                 # fall back and get the default value if needed
                 trans_dict[field] = self.get_translation(lang, field)
+
             cache.set(key, trans_dict)
         return trans_dict
 
