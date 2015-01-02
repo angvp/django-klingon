@@ -9,6 +9,7 @@ env:
 install:
   - pip install -q Django==$DJANGO
   - pip install -q nose django-nose
+  - pio install -q django-autoslug
   - pip install -q coverage coveralls
   - pip install -e .
 script:
