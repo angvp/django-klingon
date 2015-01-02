@@ -11,16 +11,16 @@ def read_file(filename):
     except IOError:
         return ''
 
+version = __import__('klingon').__version__
+readme = read_file('README.rst')
+history = read_file('HISTORY.rst').replace('.. :changelog:', '')
+
 if sys.argv[-1] == 'publish':
     os.system('python setup.py sdist upload')
     print("You probably want to also tag the version now:")
     print("  git tag -a %s -m 'version %s'" % (version, version))
     print("  git push --tags")
     sys.exit()
-
-version = __import__('klingon').__version__
-readme = read_file('README.rst')
-history = read_file('HISTORY.rst').replace('.. :changelog:', '')
 
 setup(
     name='django-klingon',
