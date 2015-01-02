@@ -182,6 +182,7 @@ class AutomaticTranslationAPITestCase(TestCase):
         )
         self.es_name = 'Independiente'
         self.es_description = 'Todo en ebooks'
+        self.es_slug = slugify(self.es_name)
 
     def tearDown(self):
         # Remove cache after each test
@@ -192,3 +193,12 @@ class AutomaticTranslationAPITestCase(TestCase):
             len(Translation.objects.all()),
             len(settings.LANGUAGES*len(self.library.translatable_fields)),
         )
+
+    def test_translation_slug(self):
+        self.library.set_translation('es', 'name', self.es_name)
+        self.library.set_translation('es', 'description', self.es_description)
+        self.assertEquals(self.library.slug, slugify(self.library.name))
+        self.assertEquals(self.library.get_translation('es', 'name'),
+                self.es_name)
+        self.assertEquals(self.library.get_translation('es', 'slug'),
+                self.es_slug)

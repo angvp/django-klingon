@@ -6,6 +6,15 @@ from django.contrib.contenttypes.generic import GenericForeignKey
 from django.db import models
 from django.utils.translation import ugettext as _
 
+INSTALLED_AUTOSLUG = False
+
+try:
+    from autoslug import AutoSlugField
+    from autoslug.settings import slugify
+    INSTALLED_AUTOSLUG = True
+except ImportError:
+    pass
+
 
 class Translation(models.Model):
     """
@@ -186,6 +195,7 @@ class Translatable(object):
         @param text: a string to be stored as translation of the field
         """
         # Do not allow user to set a translations in the default language
+        auto_slug_obj = None
         if lang == self._get_default_language():
             raise CanNotTranslate(
                 _('You are not supposed to translate the default language. '\
@@ -195,6 +205,20 @@ class Translatable(object):
         trans_obj = self.get_translation_obj(lang, field, create=True)
         trans_obj.translation = text
         trans_obj.save()
+        # check if the field has an autoslugfield and create the translation
+        if INSTALLED_AUTOSLUG:
+            if self.translatable_slug:
+                try:
+                    auto_slug_obj = self._meta.get_field(self.translatable_slug).populate_from
+                except AttributeError:
+                    pass
+
+        if auto_slug_obj:
+            tobj = self.get_translation_obj(lang, self.translatable_slug, create=True)
+            translation = self.get_translation(lang, auto_slug_obj)
+            tobj.translation = slugify(translation)
+            tobj.save()
+
         # Update cache for this specif translations
         key = self._get_translation_cache_key(lang, field)
         cache.set(key, text)
