@@ -149,3 +149,9 @@ You can run the tests with via::
 or::
 
     python runtests.py
+
+
+.. image:: https://d2weczhvl823v0.cloudfront.net/RouteAtlas/django-klingon/trend.png
+   :alt: Bitdeli badge
+   :target: https://bitdeli.com/free
+
