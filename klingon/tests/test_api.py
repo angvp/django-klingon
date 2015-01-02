@@ -180,7 +180,7 @@ class AutomaticTranslationAPITestCase(TestCase):
             name="Indepent",
             description="All in ebooks",
         )
-        self.es_name = 'Independiente'
+        self.es_name = u"Independiente"
         self.es_description = 'Todo en ebooks'
         self.es_slug = slugify(self.es_name)
 
