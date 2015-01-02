@@ -9,9 +9,7 @@ env:
   - DJANGO=1.7.1
 install:
   - pip install -q Django==$DJANGO
-  - pip install -q nose django-nose
-  - pip install -q django-autoslug
-  - pip install -q coverage coveralls
+  - pip install -r requirements-test.txt
   - pip install -e .
 script:
   - coverage run --source klingon setup.py test

@@ -44,7 +44,6 @@ class TranslationAPITestCase(TestCase):
             self.book.get_translation('es', 'slug'),
             self.es_slug,
         )
-        # TODO: check why is not getting the slug
         self.assertEquals(
             self.book.translations('es'),
             {
@@ -177,7 +176,7 @@ class TranslationAPITestCase(TestCase):
 class AutomaticTranslationAPITestCase(TestCase):
     def setUp(self):
         self.library = Library.objects.create(
-            name="Indepent",
+            name=u"Indepent",
             description="All in ebooks",
         )
         self.es_name = u"Independiente"
