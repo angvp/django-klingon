@@ -1,10 +1,13 @@
 import datetime
+
 from django.conf import settings
 from django.core.cache import cache
 from django.test import TestCase
 from django.test.utils import override_settings
+from django.utils.text import slugify
+from klingon.models import CanNotTranslate, Translation
+
 from .testapp.models import Book, Library
-from klingon.models import Translation, CanNotTranslate
 
 
 class TranslationAPITestCase(TestCase):
@@ -12,10 +15,12 @@ class TranslationAPITestCase(TestCase):
         self.book = Book.objects.create(
             title="The Raven",
             description="The Raven is a narrative poem",
-            publication_date=datetime.date(1845, 1, 1)
+            publication_date=datetime.date(1845, 1, 1),
+            slug="the-raven"
         )
-        self.es_title = 'El Cuervo'
+        self.es_title = u"El Cuervo"
         self.es_description = 'El Cuervo es un poema narrativo'
+        self.es_slug = slugify(self.es_title)
 
     def tearDown(self):
         # Remove cache after each test
@@ -25,6 +30,7 @@ class TranslationAPITestCase(TestCase):
         # translate book to spanish
         self.book.set_translation('es', 'title', self.es_title)
         self.book.set_translation('es', 'description', self.es_description)
+        self.book.set_translation('es', 'slug', self.es_slug)
         # Get translations
         self.assertEquals(
             self.book.get_translation('es', 'title'),
@@ -32,13 +38,18 @@ class TranslationAPITestCase(TestCase):
         )
         self.assertEquals(
             self.book.get_translation('es', 'description'),
-            self.es_description
+            self.es_description,
+        )
+        self.assertEquals(
+            self.book.get_translation('es', 'slug'),
+            self.es_slug,
         )
         self.assertEquals(
             self.book.translations('es'),
             {
                 'title': self.es_title,
                 'description': self.es_description,
+                'slug': self.es_slug,
             }
         )
 
@@ -51,15 +62,21 @@ class TranslationAPITestCase(TestCase):
             self.book.get_translation('es', 'description'),
             self.book.description
         )
+        self.assertEquals(
+            self.book.get_translation('es', 'slug'),
+            self.book.slug
+        )
 
     def test_create_translations(self):
         self.book.translate()
+
         self.assertEquals(
-            len(Translation.objects.all()),
+            Translation.objects.count(),
             len(settings.LANGUAGES*len(self.book.translatable_fields)),
         )
         # nothing should happen if you run translate tiwce
         self.book.translate()
+
         self.assertEquals(
             len(Translation.objects.all()),
             len(settings.LANGUAGES*len(self.book.translatable_fields)),
@@ -84,16 +101,18 @@ class TranslationAPITestCase(TestCase):
         # translate book to spanish
         self.book.set_translation('es', 'title', self.es_title)
         self.book.set_translation('es', 'description', self.es_description)
+        self.book.set_translation('es', 'slug', self.es_slug)
         # get all spanish translations for the book
         self.assertEquals(
             self.book.translations('es'),
-            {'title': self.es_title, 'description': self.es_description}
+            {'title': self.es_title, 'description': self.es_description, 'slug': self.es_slug}
         )
 
     def test_translations_cache(self):
         # translate book to spanish
         self.book.set_translation('es', 'title', self.es_title)
         self.book.set_translation('es', 'description', self.es_description)
+        self.book.set_translation('es', 'slug', self.es_slug)
         # get translations
         trans = self.book.translations('es')
         # set a new translation
@@ -104,12 +123,13 @@ class TranslationAPITestCase(TestCase):
         self.assertNotEquals(trans, new_trans)
         self.assertEquals(
             new_trans,
-            {'title': es_new_title, 'description': self.es_description}
+            {'title': es_new_title, 'description': self.es_description, 'slug': self.es_slug}
         )
 
     @override_settings(KLINGON_DEFAULT_LANGUAGE='en')
     def test_create_translations_with_default_language(self):
         self.book.translate()
+
         self.assertEquals(
             len(Translation.objects.all()),
             (len(settings.LANGUAGES)-1)*len(self.book.translatable_fields)
@@ -156,11 +176,12 @@ class TranslationAPITestCase(TestCase):
 class AutomaticTranslationAPITestCase(TestCase):
     def setUp(self):
         self.library = Library.objects.create(
-            name="Indepent",
+            name=u"Indepent",
             description="All in ebooks",
         )
-        self.es_name = 'Independiente'
+        self.es_name = u"Independiente"
         self.es_description = 'Todo en ebooks'
+        self.es_slug = slugify(self.es_name)
 
     def tearDown(self):
         # Remove cache after each test
@@ -171,3 +192,12 @@ class AutomaticTranslationAPITestCase(TestCase):
             len(Translation.objects.all()),
             len(settings.LANGUAGES*len(self.library.translatable_fields)),
         )
+
+    def test_translation_slug(self):
+        self.library.set_translation('es', 'name', self.es_name)
+        self.library.set_translation('es', 'description', self.es_description)
+        self.assertEquals(self.library.slug, slugify(self.library.name))
+        self.assertEquals(self.library.get_translation('es', 'name'),
+                self.es_name)
+        self.assertEquals(self.library.get_translation('es', 'slug'),
+                self.es_slug)

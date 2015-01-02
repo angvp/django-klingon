@@ -12,7 +12,7 @@ class Command(BaseCommand):
             try:
                 app, name = model_name.split('.')
                 model = get_model(app, name)
-                for obj in model.objects.all():
+                for obj in model.objects.only('pk'):
                     obj.translate()
             except Exception as e:
                 raise CommandError('Error, can not translate model "%s". %s' % (model_name, e))

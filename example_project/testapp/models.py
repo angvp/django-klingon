@@ -9,8 +9,10 @@ class Book(models.Model, Translatable):
     title = models.CharField(max_length=100)
     description = models.TextField()
     publication_date = models.DateField()
+    slug = models.SlugField(populate_from='title')
 
-    translatable_fields = ('title', 'description')
+    translatable_fields = ('title', 'description', 'slug')
+    translatable_slug = 'slug'
 
     def __unicode__(self):
         return self.title
