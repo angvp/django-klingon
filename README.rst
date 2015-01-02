@@ -8,6 +8,10 @@ klingon
 .. image:: https://travis-ci.org/RouteAtlas/django-klingon.svg?branch=master
   :target: http://travis-ci.org/RouteAtlas/django-klingon
 
+.. image:: https://readthedocs.org/projects/django-klingon/badge/?version=latest
+  :target: https://readthedocs.org/projects/django-klingon/?badge=latest
+  :alt: Documentation Status
+
 Welcome to the documentation for django-klingon!
 
 django-klingon is an attempt to make django model translations suck
