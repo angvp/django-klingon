@@ -18,7 +18,7 @@ if sys.argv[-1] == 'publish':
     print("  git push --tags")
     sys.exit()
 
-version = __import__('klingon').__version
+version = __import__('klingon').__version__
 readme = read_file('README.rst')
 history = read_file('HISTORY.rst').replace('.. :changelog:', '')
 
