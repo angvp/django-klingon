@@ -2,11 +2,11 @@ klingon
 ========================
 
 
-.. image:: https://coveralls.io/repos/RouteAtlas/django-klingon/badge.png?branch=master
-  :target: https://coveralls.io/r/RouteAtlas/django-klingon?branch=master
+.. image:: https://coveralls.io/repos/angvp/django-klingon/badge.png?branch=master
+  :target: https://coveralls.io/r/angvp/django-klingon?branch=master
 
-.. image:: https://travis-ci.org/RouteAtlas/django-klingon.svg?branch=master
-  :target: http://travis-ci.org/RouteAtlas/django-klingon
+.. image:: https://travis-ci.org/angvp/django-klingon.svg?branch=master
+  :target: http://travis-ci.org/angvp/django-klingon
 
 .. image:: https://readthedocs.org/projects/django-klingon/badge/?version=latest
   :target: https://readthedocs.org/projects/django-klingon/?badge=latest
