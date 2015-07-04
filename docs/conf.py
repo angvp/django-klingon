@@ -47,7 +47,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'django-klingon'
-copyright = u'2015, RouteAtlas'
+copyright = u'2015, Ángel Velásquez'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the

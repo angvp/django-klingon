@@ -29,7 +29,7 @@ setup(
     author_email='angvp@archlinux.org',
     packages=find_packages(),
     include_package_data=True,
-    url='http://github.com/RouteAtlas/django-klingon',
+    url='http://github.com/angvp/django-klingon',
     license='GPL',
     description="""django-klingon is an attempt to make django model translation
     suck but with no integrations pain in your app!""",

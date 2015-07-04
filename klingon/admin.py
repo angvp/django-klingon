@@ -29,6 +29,7 @@ class TranslationInlineForm(ModelForm):
 
     class Meta:
         model = Translation
+        exclude = []
 
     def __init__(self, *args, **kwargs):
        res = super(TranslationInlineForm, self).__init__(*args, **kwargs)
