@@ -11,6 +11,11 @@ klingon
 .. image:: https://readthedocs.org/projects/django-klingon/badge/?version=latest
   :target: https://readthedocs.org/projects/django-klingon/?badge=latest
   :alt: Documentation Status
+  
+.. image:: https://codeclimate.com/github/angvp/django-klingon/badges/coverage.svg
+  :target: https://codeclimate.com/github/angvp/django-klingon/coverage
+  :alt: Test Coverage
+
 
 Welcome to the documentation for django-klingon!
 
