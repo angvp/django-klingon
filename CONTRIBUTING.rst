@@ -36,8 +36,8 @@ is open to whoever wants to implement it.
 Write Documentation
 ~~~~~~~~~~~~~~~~~~~
 
-django-klingon-translatableautoslug could always use more documentation, whether as part of the 
-official django-klingon-translatableautoslug docs, in docstrings, or even on the web in blog posts,
+django-klingon could always use more documentation, whether as part of the 
+official django-klingon docs, in docstrings, or even on the web in blog posts,
 articles, and such.
 
 Submit Feedback
@@ -66,7 +66,6 @@ Ready to contribute? Here's how to set up `django-klingon` for local development
 
     $ mkvirtualenv django-klingon
     $ cd django-klingon/
-    $ python setup.py develop
 
 4. Create a branch for local development::
 
@@ -89,7 +88,7 @@ To get flake8 and tox, just pip install them into your virtualenv.
     $ git commit -m "Your detailed description of your changes."
     $ git push origin name-of-your-bugfix-or-feature
 
-7. Submit a pull request through the GitHub website.
+7. Submit a pull request through the GitHub website to the ``develop`` repo.
 
 Pull Request Guidelines
 -----------------------
