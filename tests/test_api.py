@@ -1,12 +1,10 @@
 import datetime
-
 from django.conf import settings
 from django.core.cache import cache
 from django.test import TestCase
 from django.test.utils import override_settings
 from django.utils.text import slugify
 from klingon.models import CanNotTranslate, Translation
-
 from .testapp.models import Book, Library
 
 
@@ -72,14 +70,14 @@ class TranslationAPITestCase(TestCase):
 
         self.assertEquals(
             Translation.objects.count(),
-            len(settings.LANGUAGES*len(self.book.translatable_fields)),
+            len(settings.LANGUAGES * len(self.book.translatable_fields)),
         )
         # nothing should happen if you run translate tiwce
         self.book.translate()
 
         self.assertEquals(
             len(Translation.objects.all()),
-            len(settings.LANGUAGES*len(self.book.translatable_fields)),
+            len(settings.LANGUAGES * len(self.book.translatable_fields)),
         )
 
     def test_set_translation(self):
@@ -132,13 +130,13 @@ class TranslationAPITestCase(TestCase):
 
         self.assertEquals(
             len(Translation.objects.all()),
-            (len(settings.LANGUAGES)-1)*len(self.book.translatable_fields)
+            (len(settings.LANGUAGES) - 1) * len(self.book.translatable_fields)
         )
         # nothing should happen if you run translate tiwce
         self.book.translate()
         self.assertEquals(
             len(Translation.objects.all()),
-            (len(settings.LANGUAGES)-1)*len(self.book.translatable_fields),
+            (len(settings.LANGUAGES) - 1) * len(self.book.translatable_fields),
         )
 
     @override_settings(KLINGON_DEFAULT_LANGUAGE='en')
@@ -190,7 +188,7 @@ class AutomaticTranslationAPITestCase(TestCase):
     def test_translation_created_automatically(self):
         self.assertEquals(
             len(Translation.objects.all()),
-            len(settings.LANGUAGES*len(self.library.translatable_fields)),
+            len(settings.LANGUAGES * len(self.library.translatable_fields)),
         )
 
     def test_translation_slug(self):
@@ -198,6 +196,6 @@ class AutomaticTranslationAPITestCase(TestCase):
         self.library.set_translation('es', 'description', self.es_description)
         self.assertEquals(self.library.slug, slugify(self.library.name))
         self.assertEquals(self.library.get_translation('es', 'name'),
-                self.es_name)
+                          self.es_name)
         self.assertEquals(self.library.get_translation('es', 'slug'),
-                self.es_slug)
+                          self.es_slug)

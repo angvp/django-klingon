@@ -23,7 +23,6 @@ class CommandsTestCase(TestCase):
         self.es_description = 'El Cuervo es un poema narrativo'
         self.es_slug = slugify(self.es_title)
 
-
     def tearDown(self):
         # Remove cache after each test
         cache.clear()
@@ -42,7 +41,7 @@ class CommandsTestCase(TestCase):
 
         self.assertEquals(
             Translation.objects.count(),
-            len(settings.LANGUAGES*(len(self.book.translatable_fields)+ifslug)),
+            len(settings.LANGUAGES * (len(self.book.translatable_fields) + ifslug)),
         )
 
     def test_translate_models_command_empty(self):

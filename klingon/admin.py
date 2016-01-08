@@ -1,10 +1,9 @@
 from django import forms
 from django.contrib import admin
-from django.contrib.contenttypes.generic import GenericTabularInline
 from django.forms.models import ModelForm
 from django.utils.translation import ugettext as _
-
 from .models import Translation
+from .compat import GenericTabularInline
 
 
 class TranslationAdmin(admin.ModelAdmin):
@@ -12,12 +11,15 @@ class TranslationAdmin(admin.ModelAdmin):
     search_fields = ('lang', 'field', 'translation')
     list_filter = ('lang', 'field', 'content_type')
 
+
 admin.site.register(Translation, TranslationAdmin)
 
 
 def create_translations(modeladmin, request, queryset):
     for obj in queryset:
         obj.translate()
+
+
 create_translations.short_description = _('Create translations for selected objects')
 
 
@@ -32,18 +34,21 @@ class TranslationInlineForm(ModelForm):
         exclude = []
 
     def __init__(self, *args, **kwargs):
-       res = super(TranslationInlineForm, self).__init__(*args, **kwargs)
-       # overwrite the widgets for each form instance depending on the object and widget dict
-       if self.widgets and self.instance and hasattr(self.instance, 'content_type'):
-           model = self.instance.content_type.model_class()
-           field = model._meta.get_field(self.instance.field)
-           # get widget for field if any
-           widget = self.widgets.get(field.get_internal_type())
-           if widget:
-               translation = self.fields['translation']
-               # overwrite widget to field
-               translation.widget = widget
-       return res
+        res = super(TranslationInlineForm, self).__init__(*args, **kwargs)
+        # overwrite the widgets for each form instance depending on the object and widget dict
+
+        if self.widgets and self.instance and hasattr(self.instance, 'content_type'):
+            model = self.instance.content_type.model_class()
+            field = model._meta.get_field(self.instance.field)
+            # get widget for field if any
+            widget = self.widgets.get(field.get_internal_type())
+
+            if widget:
+                translation = self.fields['translation']
+                # overwrite widget to field
+                translation.widget = widget
+
+        return res
 
     def clean_translation(self):
         """
@@ -51,23 +56,25 @@ class TranslationInlineForm(ModelForm):
         be translated.
         """
         translation = self.cleaned_data['translation']
+
         if self.instance and self.instance.content_object:
             # do not allow string longer than translatable field
             obj = self.instance.content_object
             field = obj._meta.get_field(self.instance.field)
             max_length = field.max_length
+
             if max_length and len(translation) > max_length:
                 raise forms.ValidationError(
-                    _('The entered translation is too long. You entered '\
-                    '%(entered)s chars, max length is %(maxlength)s') % {
+                    _('The entered translation is too long. You entered '
+                      '%(entered)s chars, max length is %(maxlength)s') % {
                         'entered': len(translation),
                         'maxlength': max_length,
                     }
                 )
         else:
             raise forms.ValidationError(
-                _('Can not store translation. First create all translation'\
-                ' for this object')
+                _('Can not store translation. First create all translation'
+                  ' for this object')
             )
         return translation
 
@@ -80,4 +87,3 @@ class TranslationInline(GenericTabularInline):
     readonly_fields = ('lang', 'field')
     exclude = ('lang', 'field')
     can_delete = False
-
