@@ -17,4 +17,4 @@ elif V19:
     get_model = apps.get_model
 
 
-__all__ = ['get_model', 'GenericForeignKey', GenericTabularInline]
+__all__ = ['get_model', 'GenericForeignKey', 'GenericTabularInline']
