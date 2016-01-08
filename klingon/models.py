@@ -1,8 +1,8 @@
+# flake8: ignore=F401
 from django.conf import settings
 from django.core import urlresolvers
 from django.core.cache import cache
 from django.contrib.contenttypes.models import ContentType
-from django.contrib.contenttypes.generic import GenericForeignKey
 from django.db import models
 from django.utils.translation import ugettext as _
 
@@ -11,9 +11,12 @@ INSTALLED_AUTOSLUG = False
 try:
     from autoslug import AutoSlugField
     from autoslug.settings import slugify
+
     INSTALLED_AUTOSLUG = True
 except ImportError:
     pass
+
+from klingon.compat import GenericForeignKey
 
 
 class Translation(models.Model):
@@ -137,19 +140,19 @@ class Translatable(object):
         trans = None
         try:
             trans = Translation.objects.get(
+                object_id=self.id,
+                content_type=ContentType.objects.get_for_model(self),
+                lang=lang,
+                field=field,
+            )
+        except Translation.DoesNotExist:
+            if create:
+                trans = Translation.objects.create(
                     object_id=self.id,
                     content_type=ContentType.objects.get_for_model(self),
                     lang=lang,
                     field=field,
                 )
-        except Translation.DoesNotExist:
-            if create:
-                trans = Translation.objects.create(
-                        object_id=self.id,
-                        content_type=ContentType.objects.get_for_model(self),
-                        lang=lang,
-                        field=field,
-                    )
         return trans
 
     def get_translation(self, lang, field):
@@ -169,16 +172,16 @@ class Translatable(object):
         # Read from cache
         key = self._get_translation_cache_key(lang, field)
         trans = cache.get(key, '')
+
         if not trans:
             trans_obj = self.get_translation_obj(lang, field)
-            trans =  getattr(trans_obj, 'translation', '')
+            trans = getattr(trans_obj, 'translation', '')
             # if there's no translation text fall back to the model field
             if not trans:
                 trans = getattr(self, field, '')
             # update cache
             cache.set(key, trans)
         return trans
-
 
     def set_translation(self, lang, field, text):
         """
@@ -196,15 +199,18 @@ class Translatable(object):
         """
         # Do not allow user to set a translations in the default language
         auto_slug_obj = None
+
         if lang == self._get_default_language():
             raise CanNotTranslate(
-                _('You are not supposed to translate the default language. '\
-                'Use the model fields for translations in default language')
+                _('You are not supposed to translate the default language. '
+                  'Use the model fields for translations in default language')
             )
+
         # Get translation, if it does not exits create one
         trans_obj = self.get_translation_obj(lang, field, create=True)
         trans_obj.translation = text
         trans_obj.save()
+
         # check if the field has an autoslugfield and create the translation
         if INSTALLED_AUTOSLUG:
             if self.translatable_slug:
@@ -238,9 +244,11 @@ class Translatable(object):
             translation_type.app_label,
             translation_type.model),
         )
+
         object_type = ContentType.objects.get_for_model(self)
         link += '?content_type__id__exact=%s&object_id=%s' % (object_type.id, self.id)
         return '<a href="%s">translate</a>' % link
+
     translations_link.allow_tags = True
     translations_link.short_description = 'Translations'
 
@@ -264,6 +272,7 @@ class AutomaticTranslation(Translatable):
     """
     Model that automatically crates translations
     """
+
     def save(self, *args, **kwargs):
         res = super(AutomaticTranslation, self).save(*args, **kwargs)
         self.translate()

@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand, CommandError
-from django.db.models.loading import get_model
+from klingon.compat import get_model
 
 
 class Command(BaseCommand):
