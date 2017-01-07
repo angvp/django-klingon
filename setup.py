@@ -11,6 +11,7 @@ def read_file(filename):
     except IOError:
         return ''
 
+
 version = __import__('klingon').__version__
 readme = read_file('README.rst')
 history = read_file('HISTORY.rst').replace('.. :changelog:', '')
@@ -39,8 +40,6 @@ setup(
         'Programming Language :: Python',
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3.4',
-        'Framework :: Django :: 1.5',
-        'Framework :: Django :: 1.6',
         'Framework :: Django :: 1.7',
         'Framework :: Django :: 1.8',
         'Development Status :: 5 - Production/Stable',
