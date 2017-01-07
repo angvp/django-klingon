@@ -32,8 +32,7 @@ setup(
     include_package_data=True,
     url='http://github.com/angvp/django-klingon',
     license='GPL',
-    description="""django-klingon is an attempt to make django model translation
-    suck but with no integrations pain in your app!""",
+    description="""django-klingon is an attempt to make django model translation suck but with no integrations pain in your app!""",
     classifiers=[
         'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
         'Intended Audience :: Developers',
