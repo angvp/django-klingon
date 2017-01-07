@@ -8,13 +8,13 @@ V16 = 6
 V17 = 7
 V18 = 8
 V19 = 9
-
+V110 = 10
 
 if version in [V15, V16]:
     from django.db.models.loading import get_model
     from django.contrib.contenttypes.generic import GenericForeignKey, GenericTabularInline
 
-if version in [V17, V18, V19]:
+if version in [V17, V18, V19, V110]:
     from django.apps.registry import apps
     from django.contrib.contenttypes.fields import GenericForeignKey
     from django.contrib.contenttypes.admin import GenericTabularInline
