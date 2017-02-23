@@ -40,8 +40,9 @@ class TranslationInlineForm(ModelForm):
         if self.widgets and self.instance and hasattr(self.instance, 'content_type'):
             model = self.instance.content_type.model_class()
             field = model._meta.get_field(self.instance.field)
-            # get widget for field if any
-            widget = self.widgets.get(field.get_internal_type())
+            # get widget for field if any - by name or by type
+            widget = self.widgets.get(field.name) or \
+                self.widgets.get(field.get_internal_type())
 
             if widget:
                 translation = self.fields['translation']
