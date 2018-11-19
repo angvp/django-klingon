@@ -13,3 +13,4 @@ dist/*
 *.sqlite3
 *.swp
 .cache
+*.ropeproject

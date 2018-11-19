@@ -39,14 +39,14 @@ class CommandsTestCase(TestCase):
         if self.book.translatable_slug:
             ifslug = 1
 
-        self.assertEquals(
+        self.assertEqual(
             Translation.objects.count(),
             len(settings.LANGUAGES * (len(self.book.translatable_fields) + ifslug)),
         )
 
     def test_translate_models_command_empty(self):
         self._test_translate_models_command([])
-        self.assertEquals(Translation.objects.count(), 0)
+        self.assertEqual(Translation.objects.count(), 0)
 
     def test_translate_models_command_wrong_args(self):
         self.assertRaises(

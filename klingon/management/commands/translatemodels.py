@@ -9,8 +9,7 @@ class Command(BaseCommand):
         ' \n Example: \n $ python manage.py translatemodels testapp.Book'
 
     def add_arguments(self, parser):
-        if version == V110:
-            parser.add_argument('args', nargs='*', default=[])
+        parser.add_argument('args', nargs='*', default=[])
 
     def handle(self, *args, **options):
         for model_name in args:

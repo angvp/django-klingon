@@ -1,6 +1,10 @@
 # flake8: ignore=F401
 from django.conf import settings
-from django.core import urlresolvers
+try:
+    from django.core import urlresolvers
+except (ModuleNotFoundError, ImportError):
+    from django import urls as urlresolvers
+
 from django.core.cache import cache
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
@@ -23,7 +27,7 @@ class Translation(models.Model):
     """
     Model that stores all translations
     """
-    content_type = models.ForeignKey(ContentType)
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     object_id = models.PositiveIntegerField()
     content_object = GenericForeignKey()
     lang = models.CharField(max_length=5, db_index=True)

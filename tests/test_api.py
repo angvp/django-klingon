@@ -30,19 +30,19 @@ class TranslationAPITestCase(TestCase):
         self.book.set_translation('es', 'description', self.es_description)
         self.book.set_translation('es', 'slug', self.es_slug)
         # Get translations
-        self.assertEquals(
+        self.assertEqual(
             self.book.get_translation('es', 'title'),
             self.es_title
         )
-        self.assertEquals(
+        self.assertEqual(
             self.book.get_translation('es', 'description'),
             self.es_description,
         )
-        self.assertEquals(
+        self.assertEqual(
             self.book.get_translation('es', 'slug'),
             self.es_slug,
         )
-        self.assertEquals(
+        self.assertEqual(
             self.book.translations('es'),
             {
                 'title': self.es_title,
@@ -52,15 +52,15 @@ class TranslationAPITestCase(TestCase):
         )
 
     def test_api_default_value(self):
-        self.assertEquals(
+        self.assertEqual(
             self.book.get_translation('es', 'title'),
             self.book.title
         )
-        self.assertEquals(
+        self.assertEqual(
             self.book.get_translation('es', 'description'),
             self.book.description
         )
-        self.assertEquals(
+        self.assertEqual(
             self.book.get_translation('es', 'slug'),
             self.book.slug
         )
@@ -68,21 +68,21 @@ class TranslationAPITestCase(TestCase):
     def test_create_translations(self):
         self.book.translate()
 
-        self.assertEquals(
+        self.assertEqual(
             Translation.objects.count(),
             len(settings.LANGUAGES * len(self.book.translatable_fields)),
         )
         # nothing should happen if you run translate tiwce
         self.book.translate()
 
-        self.assertEquals(
+        self.assertEqual(
             len(Translation.objects.all()),
             len(settings.LANGUAGES * len(self.book.translatable_fields)),
         )
 
     def test_set_translation(self):
         self.book.set_translation('es', 'title', self.es_title)
-        self.assertEquals(
+        self.assertEqual(
             Translation.objects.get(lang='es', field='title').translation,
             self.es_title
         )
@@ -90,7 +90,7 @@ class TranslationAPITestCase(TestCase):
     def test_get_translation(self):
         self.book.set_translation('es', 'title', self.es_title)
         es_title = self.book.get_translation('es', 'title')
-        self.assertEquals(
+        self.assertEqual(
             es_title,
             self.es_title
         )
@@ -101,7 +101,7 @@ class TranslationAPITestCase(TestCase):
         self.book.set_translation('es', 'description', self.es_description)
         self.book.set_translation('es', 'slug', self.es_slug)
         # get all spanish translations for the book
-        self.assertEquals(
+        self.assertEqual(
             self.book.translations('es'),
             {'title': self.es_title, 'description': self.es_description, 'slug': self.es_slug}
         )
@@ -118,8 +118,8 @@ class TranslationAPITestCase(TestCase):
         self.book.set_translation('es', 'title', es_new_title)
         # get new translations
         new_trans = self.book.translations('es')
-        self.assertNotEquals(trans, new_trans)
-        self.assertEquals(
+        self.assertNotEqual(trans, new_trans)
+        self.assertEqual(
             new_trans,
             {'title': es_new_title, 'description': self.es_description, 'slug': self.es_slug}
         )
@@ -128,13 +128,13 @@ class TranslationAPITestCase(TestCase):
     def test_create_translations_with_default_language(self):
         self.book.translate()
 
-        self.assertEquals(
+        self.assertEqual(
             len(Translation.objects.all()),
             (len(settings.LANGUAGES) - 1) * len(self.book.translatable_fields)
         )
         # nothing should happen if you run translate tiwce
         self.book.translate()
-        self.assertEquals(
+        self.assertEqual(
             len(Translation.objects.all()),
             (len(settings.LANGUAGES) - 1) * len(self.book.translatable_fields),
         )
@@ -143,23 +143,23 @@ class TranslationAPITestCase(TestCase):
     def test_get_translation_with_default_language(self):
         es_title = self.book.get_translation('es', 'title')
         # Get should not create empty translations
-        self.assertEquals(Translation.objects.count(), 0)
+        self.assertEqual(Translation.objects.count(), 0)
         # Get should fall back to default language
-        self.assertEquals(es_title, self.book.title)
+        self.assertEqual(es_title, self.book.title)
 
     @override_settings(KLINGON_DEFAULT_LANGUAGE='en')
     def test_set_translation_with_default_language(self):
         # Verify that there are no translations
-        self.assertEquals(Translation.objects.count(), 0)
+        self.assertEqual(Translation.objects.count(), 0)
         # Create a translation
         self.book.set_translation('es', 'title', self.es_title)
         # Get should work as expected
-        self.assertEquals(
+        self.assertEqual(
             self.es_title,
             self.book.get_translation('es', 'title')
         )
         # Verify that only one translation was created
-        self.assertEquals(Translation.objects.count(), 1)
+        self.assertEqual(Translation.objects.count(), 1)
 
     @override_settings(KLINGON_DEFAULT_LANGUAGE='en')
     def test_set_translation_in_default_language(self):
@@ -186,7 +186,7 @@ class AutomaticTranslationAPITestCase(TestCase):
         cache.clear()
 
     def test_translation_created_automatically(self):
-        self.assertEquals(
+        self.assertEqual(
             len(Translation.objects.all()),
             len(settings.LANGUAGES * len(self.library.translatable_fields)),
         )
@@ -194,8 +194,8 @@ class AutomaticTranslationAPITestCase(TestCase):
     def test_translation_slug(self):
         self.library.set_translation('es', 'name', self.es_name)
         self.library.set_translation('es', 'description', self.es_description)
-        self.assertEquals(self.library.slug, slugify(self.library.name))
-        self.assertEquals(self.library.get_translation('es', 'name'),
+        self.assertEqual(self.library.slug, slugify(self.library.name))
+        self.assertEqual(self.library.get_translation('es', 'name'),
                           self.es_name)
-        self.assertEquals(self.library.get_translation('es', 'slug'),
+        self.assertEqual(self.library.get_translation('es', 'slug'),
                           self.es_slug)

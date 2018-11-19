@@ -4,6 +4,7 @@ from __future__ import (division, print_function, unicode_literals,
 from django import VERSION
 from django.apps.registry import apps
 from django.contrib.contenttypes.admin import GenericTabularInline
+
 from django.contrib.contenttypes.fields import GenericForeignKey
 
 version = VERSION[1]

@@ -2,6 +2,6 @@ coverage
 coveralls
 flake8>=2.1.0
 tox>=2.1.1
-django-autoslug>=1.7.2
+django-autoslug-iplweb
 pytest
 pytest-django
