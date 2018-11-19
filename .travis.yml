@@ -16,16 +16,15 @@ env:
     - TOX_ENV=py36-django2.1
     - TOX_ENV=py37-django2.1
 
-
 matrix:
   fast_finish: true
 
 install:
-  - pip install tox coverage coveralls
+  - pip install tox-travis coverage coveralls
 
 script:
   - coverage erase
-  - tox -e $TOX_ENV
+  - tox
 
 after_success:
   - coverage combine
