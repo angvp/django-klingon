@@ -3,18 +3,14 @@ language: python
 python:
   - "2.7"
   - "3.6"
-  - "3.7"
 
 sudo: false
 
 env:
     - TOX_ENV=py27-django1.11
-    - TOX_ENV=py37-django1.11
     - TOX_ENV=py36-django1.11
     - TOX_ENV=py36-django2.0
-    - TOX_ENV=py37-django2.0
     - TOX_ENV=py36-django2.1
-    - TOX_ENV=py37-django2.1
 
 matrix:
   fast_finish: true
