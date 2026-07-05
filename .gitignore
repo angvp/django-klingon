@@ -17,3 +17,4 @@ build/*
 *.ropeproject
 .ruff_cache/
 coverage.xml
+REVIVAL_PLAN.md

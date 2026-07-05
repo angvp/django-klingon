@@ -55,3 +55,13 @@ class CommandsTestCase(TestCase):
             self._test_translate_models_command,
             ['wrong.argument']
         )
+
+    def test_translate_models_command_not_translatable_model(self):
+        # ContentType always has rows in a test DB (created by Django's
+        # contenttypes machinery), so the command's loop actually runs and
+        # hits AttributeError when it calls .translate() on a plain model.
+        self.assertRaises(
+            CommandError,
+            self._test_translate_models_command,
+            ['contenttypes.ContentType']
+        )
