@@ -18,3 +18,4 @@ build/*
 .ruff_cache/
 coverage.xml
 REVIVAL_PLAN.md
+uv.lock
