@@ -1,3 +1,5 @@
+<img src="django-klingon-logo.png" alt="django-klingon" width="200">
+
 # django-klingon
 
 [![Tests](https://github.com/angvp/django-klingon/actions/workflows/tests.yml/badge.svg)](https://github.com/angvp/django-klingon/actions/workflows/tests.yml)
@@ -97,7 +99,7 @@ class BookAdmin(admin.ModelAdmin):
     actions = [create_translations]
 ```
 
-* see full example in example_project folder of source code of klingon
+* see full example in the klingon-example repo (sibling project to django-klingon)
 
 ### Using Specific Widgets in the TranslationInline form of the admin:
 
@@ -123,7 +125,7 @@ class BookAdmin(admin.ModelAdmin):
     inlines = [RichTranslationInline]
 ```
 
-* see full example in example_project folder of source code of klingon
+* see full example in the klingon-example repo (sibling project to django-klingon)
 
 ## Using the API
 

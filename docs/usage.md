@@ -24,7 +24,7 @@ class BookAdmin(admin.ModelAdmin):
     inlines = [RichTranslationInline]
 ```
 
-* see full example in example_project folder of source code of klingon
+* see full example in the klingon-example repo (sibling project to django-klingon)
 
 ## Using the API
 
