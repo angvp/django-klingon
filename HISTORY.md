@@ -17,6 +17,22 @@
 * Migrated packaging from `setup.py` to `pyproject.toml`, replaced Travis CI
   with GitHub Actions, and switched linting from flake8 to ruff.
 * Converted all documentation from reStructuredText to Markdown.
+* Fixed a stale-cache bug: translating the slug's source field (e.g. `name`)
+  regenerated the slug translation row but left the old value in the
+  per-field cache, so `get_translation()` kept returning the stale slug.
+* Fixed explicit slug translations being silently overwritten: calling
+  `set_translation()` on the slug field itself no longer triggers auto-slug
+  regeneration — the explicitly-set value now wins.
+* Translation cache keys are now app-qualified (`app_label.model` instead of
+  the bare class name), so identically-named models in different apps can no
+  longer collide. Existing cache entries are invalidated once on upgrade.
+* `translate()` and `set_translation()` on an unsaved instance now raise
+  `CanNotTranslate` with a clear message instead of a database
+  `IntegrityError`.
+* `translate()`/`translations()` no longer mutate `translatable_fields` to
+  append the `translatable_slug`; the combined list is computed internally.
+* `Translatable` now uses `pk` instead of assuming an `id` attribute, so
+  models with a custom-named integer primary key work.
 
 ## 0.0.7 (2017-1-7)
 

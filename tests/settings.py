@@ -19,4 +19,5 @@ SETTINGS = {
         ('es', 'Spanish'),
     ),
     'MIDDLEWARE': (),
+    'ROOT_URLCONF': 'tests.urls',
 }

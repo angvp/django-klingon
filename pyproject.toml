@@ -59,6 +59,14 @@ select = ["E", "W", "F", "I", "UP", "B", "C4", "DJ"]
 [tool.ruff.lint.per-file-ignores]
 "*/migrations/*.py" = ["E501"]
 
+[tool.coverage.run]
+source = ["klingon"]
+
+[tool.coverage.report]
+show_missing = true
+# Raised after the 0.1.0 coverage push; keep new code from regressing it.
+fail_under = 95
+
 [dependency-groups]
 # No version pins here — requirements-test.txt is the single source of
 # truth for dev/test dependency floors (used by tox and CI). Keeping this

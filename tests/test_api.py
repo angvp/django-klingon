@@ -71,16 +71,18 @@ class TranslationAPITestCase(TestCase):
     def test_create_translations(self):
         self.book.translate()
 
+        # translatable_fields plus the translatable_slug
+        fields_count = len(self.book.translatable_fields) + 1
         self.assertEqual(
             Translation.objects.count(),
-            len(settings.LANGUAGES * len(self.book.translatable_fields)),
+            len(settings.LANGUAGES) * fields_count,
         )
         # nothing should happen if you run translate tiwce
         self.book.translate()
 
         self.assertEqual(
-            len(Translation.objects.all()),
-            len(settings.LANGUAGES * len(self.book.translatable_fields)),
+            Translation.objects.count(),
+            len(settings.LANGUAGES) * fields_count,
         )
 
     def test_set_translation(self):
@@ -139,15 +141,17 @@ class TranslationAPITestCase(TestCase):
     def test_create_translations_with_default_language(self):
         self.book.translate()
 
+        # translatable_fields plus the translatable_slug
+        fields_count = len(self.book.translatable_fields) + 1
         self.assertEqual(
             len(Translation.objects.all()),
-            (len(settings.LANGUAGES) - 1) * len(self.book.translatable_fields)
+            (len(settings.LANGUAGES) - 1) * fields_count
         )
         # nothing should happen if you run translate tiwce
         self.book.translate()
         self.assertEqual(
             len(Translation.objects.all()),
-            (len(settings.LANGUAGES) - 1) * len(self.book.translatable_fields),
+            (len(settings.LANGUAGES) - 1) * fields_count,
         )
 
     @override_settings(KLINGON_DEFAULT_LANGUAGE='en')
@@ -197,9 +201,11 @@ class AutomaticTranslationAPITestCase(TestCase):
         cache.clear()
 
     def test_translation_created_automatically(self):
+        # translatable_fields plus the translatable_slug
+        fields_count = len(self.library.translatable_fields) + 1
         self.assertEqual(
             len(Translation.objects.all()),
-            len(settings.LANGUAGES * len(self.library.translatable_fields)),
+            len(settings.LANGUAGES) * fields_count,
         )
 
     def test_translation_slug(self):
