@@ -1,6 +1,7 @@
+from django.apps import apps
 from django.core.management.base import BaseCommand, CommandError
-from klingon.compat import get_model, V110, version
-import os
+
+get_model = apps.get_model
 
 
 class Command(BaseCommand):
@@ -19,6 +20,8 @@ class Command(BaseCommand):
                 for obj in model.objects.only('pk'):
                     obj.translate()
             except Exception as e:
-                raise CommandError('Error, can not translate model "%s". %s' % (model_name, e))
+                raise CommandError(
+                    f'Error, can not translate model "{model_name}". {e}'
+                ) from e
             else:
-                self.stdout.write('All translations created for "%s"' % model_name)
+                self.stdout.write(f'All translations created for "{model_name}"')

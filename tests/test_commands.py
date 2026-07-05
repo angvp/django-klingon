@@ -6,6 +6,7 @@ from django.core.management import call_command
 from django.core.management.base import CommandError
 from django.test import TestCase
 from django.utils.text import slugify
+
 from klingon.models import Translation
 
 from .testapp.models import Book
@@ -19,7 +20,7 @@ class CommandsTestCase(TestCase):
             publication_date=datetime.date(1845, 1, 1),
             slug="the-raven",
         )
-        self.es_title = u"El Cuervo"
+        self.es_title = "El Cuervo"
         self.es_description = 'El Cuervo es un poema narrativo'
         self.es_slug = slugify(self.es_title)
 

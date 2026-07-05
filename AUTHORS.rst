@@ -1,2 +1,0 @@
-Rafael Capdevielle
-Angel Velasquez 

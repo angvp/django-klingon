@@ -3,12 +3,11 @@
 help:
 	@echo "clean-build - remove build artifacts"
 	@echo "clean-pyc - remove Python file artifacts"
-	@echo "lint - check style with flake8"
+	@echo "lint - check style with ruff"
 	@echo "test - run tests quickly with the default Python"
 	@echo "testall - run tests on every Python version with tox"
 	@echo "coverage - check code coverage quickly with the default Python"
 	@echo "docs - generate Sphinx HTML documentation, including API docs"
-	@echo "release - package and upload a release"
 	@echo "sdist - package"
 
 clean: clean-build clean-pyc
@@ -24,32 +23,25 @@ clean-pyc:
 	find . -name '*~' -exec rm -f {} +
 
 lint:
-	flake8 django-klingon-translatableautoslug tests
+	ruff check klingon tests
 
 test:
-	python runtests.py test
+	python runtests.py
 
 test-all:
 	tox
 
 coverage:
-	coverage run --source django-klingon setup.py test
+	coverage run --source klingon runtests.py --fast --create-db
 	coverage report -m
 	coverage html
 	open htmlcov/index.html
 
 docs:
-	rm -f docs/django-klingon.rst
-	rm -f docs/modules.rst
-	sphinx-apidoc -o docs/ django-klingon
 	$(MAKE) -C docs clean
 	$(MAKE) -C docs html
 	open docs/_build/html/index.html
 
-release: clean
-	python setup.py sdist upload
-	python setup.py bdist_wheel upload
-
 sdist: clean
-	python setup.py sdist
+	python -m build --sdist
 	ls -l dist

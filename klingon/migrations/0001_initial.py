@@ -1,8 +1,5 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
-from django.db import migrations, models
 import django.db.models.deletion
+from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
@@ -28,6 +25,6 @@ class Migration(migrations.Migration):
         ),
         migrations.AlterUniqueTogether(
             name='translation',
-            unique_together=set([('content_type', 'object_id', 'lang', 'field')]),
+            unique_together={('content_type', 'object_id', 'lang', 'field')},
         ),
     ]
