@@ -38,8 +38,8 @@ coverage:
 	-open htmlcov/index.html
 
 docs:
-	$(MAKE) -C docs clean
-	$(MAKE) -C docs html
+	rm -fr docs/_build
+	sphinx-build -b html docs docs/_build/html
 	open docs/_build/html/index.html
 
 sdist: clean
