@@ -57,9 +57,13 @@ jobs:
         run: |
           coverage run --source klingon runtests.py --fast --create-db
 
+      - name: Check coverage threshold
+        if: matrix.python-version == '3.13' && matrix.django-version == '5.2'
+        run: coverage report
+
       - name: Generate coverage XML
         if: matrix.python-version == '3.13' && matrix.django-version == '5.2'
-        run: coverage xml
+        run: coverage xml --fail-under=0
 
       - name: Upload coverage to Codecov
         if: matrix.python-version == '3.13' && matrix.django-version == '5.2'

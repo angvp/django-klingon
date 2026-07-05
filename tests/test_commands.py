@@ -1,67 +1,44 @@
-import datetime
-
+import pytest
 from django.conf import settings
-from django.core.cache import cache
 from django.core.management import call_command
 from django.core.management.base import CommandError
-from django.test import TestCase
-from django.utils.text import slugify
 
 from klingon.models import Translation
 
-from .testapp.models import Book
+
+@pytest.mark.django_db
+def test_translate_models_command_success(book):
+    """Test translatemodels command creates translations for specified model."""
+    call_command('translatemodels', 'testapp.Book')
+
+    ifslug = 1 if book.translatable_slug else 0
+
+    assert Translation.objects.count() == len(settings.LANGUAGES) * (
+        len(book.translatable_fields) + ifslug
+    )
 
 
-class CommandsTestCase(TestCase):
-    def setUp(self):
-        self.book = Book.objects.create(
-            title="The Raven",
-            description="The Raven is a narrative poem",
-            publication_date=datetime.date(1845, 1, 1),
-            slug="the-raven",
-        )
-        self.es_title = "El Cuervo"
-        self.es_description = 'El Cuervo es un poema narrativo'
-        self.es_slug = slugify(self.es_title)
+@pytest.mark.django_db
+def test_translate_models_command_empty():
+    """Test translatemodels command with no arguments does nothing."""
+    call_command('translatemodels')
+    assert Translation.objects.count() == 0
 
-    def tearDown(self):
-        # Remove cache after each test
-        cache.clear()
 
-    def _test_translate_models_command(self, args):
-        args = args
-        opts = {}
-        call_command('translatemodels', *args, **opts)
+@pytest.mark.django_db
+def test_translate_models_command_wrong_args():
+    """Test translatemodels command raises CommandError for invalid model."""
+    with pytest.raises(CommandError):
+        call_command('translatemodels', 'wrong.argument')
 
-    def test_translate_models_command_success(self):
-        self._test_translate_models_command(['testapp.Book'])
 
-        ifslug = 0
-        if self.book.translatable_slug:
-            ifslug = 1
+@pytest.mark.django_db
+def test_translate_models_command_not_translatable_model():
+    """Test translatemodels command raises CommandError for non-translatable model.
 
-        self.assertEqual(
-            Translation.objects.count(),
-            len(settings.LANGUAGES * (len(self.book.translatable_fields) + ifslug)),
-        )
-
-    def test_translate_models_command_empty(self):
-        self._test_translate_models_command([])
-        self.assertEqual(Translation.objects.count(), 0)
-
-    def test_translate_models_command_wrong_args(self):
-        self.assertRaises(
-            CommandError,
-            self._test_translate_models_command,
-            ['wrong.argument']
-        )
-
-    def test_translate_models_command_not_translatable_model(self):
-        # ContentType always has rows in a test DB (created by Django's
-        # contenttypes machinery), so the command's loop actually runs and
-        # hits AttributeError when it calls .translate() on a plain model.
-        self.assertRaises(
-            CommandError,
-            self._test_translate_models_command,
-            ['contenttypes.ContentType']
-        )
+    ContentType always has rows in a test DB (created by Django's
+    contenttypes machinery), so the command's loop actually runs and
+    hits AttributeError when it calls .translate() on a plain model.
+    """
+    with pytest.raises(CommandError):
+        call_command('translatemodels', 'contenttypes.ContentType')

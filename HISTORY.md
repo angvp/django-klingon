@@ -25,7 +25,9 @@
   regeneration — the explicitly-set value now wins.
 * Translation cache keys are now app-qualified (`app_label.model` instead of
   the bare class name), so identically-named models in different apps can no
-  longer collide. Existing cache entries are invalidated once on upgrade.
+  longer collide. This changes the cache key format; pre-upgrade entries are
+  simply never read again under the new keys and age out via the cache
+  backend's normal eviction — no explicit flush is performed.
 * `translate()` and `set_translation()` on an unsaved instance now raise
   `CanNotTranslate` with a clear message instead of a database
   `IntegrityError`.
