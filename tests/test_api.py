@@ -1,10 +1,13 @@
 import datetime
+
 from django.conf import settings
 from django.core.cache import cache
 from django.test import TestCase
 from django.test.utils import override_settings
 from django.utils.text import slugify
+
 from klingon.models import CanNotTranslate, Translation
+
 from .testapp.models import Book, Library
 
 
@@ -16,7 +19,7 @@ class TranslationAPITestCase(TestCase):
             publication_date=datetime.date(1845, 1, 1),
             slug="the-raven"
         )
-        self.es_title = u"El Cuervo"
+        self.es_title = "El Cuervo"
         self.es_description = 'El Cuervo es un poema narrativo'
         self.es_slug = slugify(self.es_title)
 
@@ -103,7 +106,11 @@ class TranslationAPITestCase(TestCase):
         # get all spanish translations for the book
         self.assertEqual(
             self.book.translations('es'),
-            {'title': self.es_title, 'description': self.es_description, 'slug': self.es_slug}
+            {
+                'title': self.es_title,
+                'description': self.es_description,
+                'slug': self.es_slug,
+            }
         )
 
     def test_translations_cache(self):
@@ -121,7 +128,11 @@ class TranslationAPITestCase(TestCase):
         self.assertNotEqual(trans, new_trans)
         self.assertEqual(
             new_trans,
-            {'title': es_new_title, 'description': self.es_description, 'slug': self.es_slug}
+            {
+                'title': es_new_title,
+                'description': self.es_description,
+                'slug': self.es_slug,
+            }
         )
 
     @override_settings(KLINGON_DEFAULT_LANGUAGE='en')
@@ -174,10 +185,10 @@ class TranslationAPITestCase(TestCase):
 class AutomaticTranslationAPITestCase(TestCase):
     def setUp(self):
         self.library = Library.objects.create(
-            name=u"Indepent",
+            name="Indepent",
             description="All in ebooks",
         )
-        self.es_name = u"Independiente"
+        self.es_name = "Independiente"
         self.es_description = 'Todo en ebooks'
         self.es_slug = slugify(self.es_name)
 

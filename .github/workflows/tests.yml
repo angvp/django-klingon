@@ -1,0 +1,104 @@
+name: Tests
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install ruff
+      - run: ruff check klingon/ tests/
+
+  test:
+    name: py${{ matrix.python-version }} / django ${{ matrix.django-version }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.10', '3.11', '3.12', '3.13', '3.14']
+        django-version: ['4.2', '5.2', '6.0']
+        exclude:
+          # Django 6.0 requires Python >= 3.12. Kept in sync by hand with the
+          # envlist split in tox.ini — update both together.
+          - python-version: '3.10'
+            django-version: '6.0'
+          - python-version: '3.11'
+            django-version: '6.0'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install "Django==${{ matrix.django-version }}.*"
+          pip install -r requirements-test.txt
+          # --no-deps: klingon's only runtime dependency is Django, already
+          # pinned to the matrix's exact version above. Without --no-deps,
+          # a future narrowing of pyproject.toml's Django range could make
+          # pip silently upgrade Django here, defeating the matrix pin.
+          pip install --no-deps -e .
+
+      - name: Run test suite
+        env:
+          PYTHONDONTWRITEBYTECODE: 1
+        run: |
+          coverage run --source klingon runtests.py --fast --create-db
+
+      - name: Generate coverage XML
+        if: matrix.python-version == '3.13' && matrix.django-version == '5.2'
+        run: coverage xml
+
+      - name: Upload coverage to Codecov
+        if: matrix.python-version == '3.13' && matrix.django-version == '5.2'
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: coverage.xml
+          fail_ci_if_error: false
+
+  makemigrations-check:
+    name: makemigrations --check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install "Django>=5.2,<6.0"
+          pip install -r requirements-test.txt
+          pip install -e .
+
+      - name: Check for missing migrations
+        run: |
+          python - <<'EOF'
+          import django
+          from django.conf import settings
+          from django.core.management import call_command
+
+          # Reuses tests/settings.py (the same source tests/conftest.py's
+          # pytest_configure() uses) so there is one place to update the
+          # test app registry instead of two.
+          from tests.settings import SETTINGS
+          settings.configure(**SETTINGS)
+          django.setup()
+          call_command('makemigrations', 'klingon', check=True, dry_run=True)
+          EOF

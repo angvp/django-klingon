@@ -10,7 +10,10 @@
 *.egg-info/*
 docs/_build/*
 dist/*
+build/*
 *.sqlite3
 *.swp
 .cache
 *.ropeproject
+.ruff_cache/
+coverage.xml

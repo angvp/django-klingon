@@ -1,9 +1,10 @@
 from django import forms
 from django.contrib import admin
+from django.contrib.contenttypes.admin import GenericTabularInline
 from django.forms.models import ModelForm
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
+
 from .models import Translation
-from .compat import GenericTabularInline
 
 
 class TranslationAdmin(admin.ModelAdmin):
@@ -31,11 +32,11 @@ class TranslationInlineForm(ModelForm):
 
     class Meta:
         model = Translation
-        exclude = []
+        fields = ('content_type', 'object_id', 'lang', 'field', 'translation')
 
     def __init__(self, *args, **kwargs):
-        res = super(TranslationInlineForm, self).__init__(*args, **kwargs)
-        # overwrite the widgets for each form instance depending on the object and widget dict
+        res = super().__init__(*args, **kwargs)
+        # overwrite the widgets for each form instance depending on object/widget dict
 
         if self.widgets and self.instance and hasattr(self.instance, 'content_type'):
             model = self.instance.content_type.model_class()

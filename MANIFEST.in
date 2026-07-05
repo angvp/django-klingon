@@ -1,5 +1,6 @@
-include AUTHORS
+include AUTHORS.md
 include LICENSE
-include README.rst
+include README.md
+include HISTORY.md
 recursive-include klingon/static *
 recursive-include klingon/templates *

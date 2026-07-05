@@ -2,9 +2,9 @@
 Test models used in django-klingon tests
 """
 from django.db import models
-from klingon.models import Translatable, AutomaticTranslation
+from django_autoslugfield import AutoSlugField
 
-from autoslug import AutoSlugField
+from klingon.models import AutomaticTranslation, Translatable
 
 
 class Book(models.Model, Translatable):
@@ -16,17 +16,17 @@ class Book(models.Model, Translatable):
     translatable_fields = ('title', 'description')
     translatable_slug = 'slug'
 
-    def __unicode__(self):
+    def __str__(self):
         return self.title
 
 
 class Library(AutomaticTranslation, models.Model):
     name = models.CharField(max_length=100)
     description = models.TextField()
-    slug = AutoSlugField(populate_from='name')
+    slug = AutoSlugField(title_field='name')
 
     translatable_fields = ('name', 'description')
     translatable_slug = 'slug'
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name

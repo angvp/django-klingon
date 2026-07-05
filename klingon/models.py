@@ -1,26 +1,21 @@
-# flake8: ignore=F401
 from django.conf import settings
-try:
-    from django.core import urlresolvers
-except (ModuleNotFoundError, ImportError):
-    from django import urls as urlresolvers
-
-from django.core.cache import cache
+from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
+from django.core.cache import cache
 from django.db import models
-from django.utils.translation import ugettext as _
+from django.urls import reverse
+from django.utils.html import format_html
+from django.utils.text import slugify
+from django.utils.translation import gettext as _
 
 INSTALLED_AUTOSLUG = False
 
 try:
-    from autoslug import AutoSlugField
-    from autoslug.settings import slugify
+    from django_autoslugfield import AutoSlugField  # noqa: F401
 
     INSTALLED_AUTOSLUG = True
 except ImportError:
     pass
-
-from klingon.compat import GenericForeignKey
 
 
 class Translation(models.Model):
@@ -32,21 +27,23 @@ class Translation(models.Model):
     content_object = GenericForeignKey()
     lang = models.CharField(max_length=5, db_index=True)
     field = models.CharField(max_length=255, db_index=True)
-    translation = models.TextField(blank=True, null=True)
+    # null=True predates this ruff rule and is part of the shipped schema;
+    # changing it would require an ALTER COLUMN migration for every install.
+    translation = models.TextField(blank=True, null=True)  # noqa: DJ001
 
     class Meta:
         ordering = ['lang', 'field']
         unique_together = (('content_type', 'object_id', 'lang', 'field'),)
 
-    def __unicode__(self):
-        return u'%s : %s : %s' % (self.content_object, self.lang, self.field)
+    def __str__(self):
+        return f'{self.content_object} : {self.lang} : {self.field}'
 
 
 class CanNotTranslate(Exception):
     pass
 
 
-class Translatable(object):
+class Translatable:
     """
     Make your model extend this class to enable this API in you model instance
     instances.
@@ -70,7 +67,7 @@ class Translatable(object):
             # create translations for all fields of each language
             if self.translatable_slug is not None:
                 if self.translatable_slug not in self.translatable_fields:
-                    self.translatable_fields = self.translatable_fields + (self.translatable_slug,)
+                    self.translatable_fields += (self.translatable_slug,)
 
             for field in self.translatable_fields:
                 trans, created = Translation.objects.get_or_create(
@@ -116,7 +113,7 @@ class Translatable(object):
 
         if self.translatable_slug is not None:
             if self.translatable_slug not in self.translatable_fields:
-                self.translatable_fields = self.translatable_fields + (self.translatable_slug,)
+                self.translatable_fields += (self.translatable_slug,)
 
         if not trans_dict:
             for field in self.translatable_fields:
@@ -219,7 +216,8 @@ class Translatable(object):
         if INSTALLED_AUTOSLUG:
             if self.translatable_slug:
                 try:
-                    auto_slug_obj = self._meta.get_field(self.translatable_slug).populate_from
+                    slug_field = self._meta.get_field(self.translatable_slug)
+                    auto_slug_obj = slug_field.title_field
                 except AttributeError:
                     pass
 
@@ -244,16 +242,14 @@ class Translatable(object):
         @param text: a string with the html to link to the translations admin interface
         """
         translation_type = ContentType.objects.get_for_model(Translation)
-        link = urlresolvers.reverse('admin:%s_%s_changelist' % (
-            translation_type.app_label,
-            translation_type.model),
+        link = reverse(
+            f'admin:{translation_type.app_label}_{translation_type.model}_changelist'
         )
 
         object_type = ContentType.objects.get_for_model(self)
-        link += '?content_type__id__exact=%s&object_id=%s' % (object_type.id, self.id)
-        return '<a href="%s">translate</a>' % link
+        link += f'?content_type__id__exact={object_type.id}&object_id={self.id}'
+        return format_html('<a href="{}">translate</a>', link)
 
-    translations_link.allow_tags = True
     translations_link.short_description = 'Translations'
 
     def _get_default_language(self):
@@ -265,11 +261,11 @@ class Translatable(object):
 
     def _get_translations_cache_key(self, lang):
         content_type = self._meta.object_name
-        return '%s:%s:%s' % (content_type, self.id, lang)
+        return f'{content_type}:{self.id}:{lang}'
 
     def _get_translation_cache_key(self, lang, field):
         content_type = self._meta.object_name
-        return '%s:%s:%s:%s' % (content_type, self.id, lang, field)
+        return f'{content_type}:{self.id}:{lang}:{field}'
 
 
 class AutomaticTranslation(Translatable):
@@ -278,6 +274,6 @@ class AutomaticTranslation(Translatable):
     """
 
     def save(self, *args, **kwargs):
-        res = super(AutomaticTranslation, self).save(*args, **kwargs)
+        res = super().save(*args, **kwargs)
         self.translate()
         return res
