@@ -33,9 +33,9 @@ test-all:
 
 coverage:
 	coverage run --source klingon runtests.py --fast --create-db
-	coverage report -m
-	coverage html
-	open htmlcov/index.html
+	-coverage report -m
+	-coverage html
+	-open htmlcov/index.html
 
 docs:
 	$(MAKE) -C docs clean

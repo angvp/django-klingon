@@ -57,7 +57,7 @@ class Translatable:
         already listed). Computed instead of mutating translatable_fields,
         so class and instance state never diverge.
         """
-        fields = self.translatable_fields
+        fields = tuple(self.translatable_fields)
         if self.translatable_slug is not None \
                 and self.translatable_slug not in fields:
             fields += (self.translatable_slug,)
@@ -70,11 +70,7 @@ class Translatable:
         @rtype: list of Translation objects
         @return: Returns a list of translations objects
         """
-        if self.pk is None:
-            raise CanNotTranslate(
-                _('Save the instance before creating translations: '
-                  'translations are linked to the object primary key')
-            )
+        self._assert_saved()
         translations = []
         for lang in settings.LANGUAGES:
             # do not create an translations for default language.
@@ -121,6 +117,12 @@ class Translatable:
         @rtype: python Dictionary
         @return: Returns a all fieldname / translations (key / value)
         """
+        if self.pk is None:
+            return {
+                field: self.get_translation(lang, field)
+                for field in self._all_translatable_fields()
+            }
+
         key = self._get_translations_cache_key(lang)
         trans_dict = cache.get(key, {})
 
@@ -157,6 +159,7 @@ class Translatable:
             )
         except Translation.DoesNotExist:
             if create:
+                self._assert_saved()
                 trans = Translation.objects.create(
                     object_id=self.pk,
                     content_type=ContentType.objects.get_for_model(self),
@@ -179,6 +182,9 @@ class Translatable:
         @rtype: string
         @return: Returns a translation string
         """
+        if self.pk is None:
+            return getattr(self, field, '')
+
         # Read from cache
         key = self._get_translation_cache_key(lang, field)
         trans = cache.get(key, '')
@@ -216,11 +222,7 @@ class Translatable:
                   'Use the model fields for translations in default language')
             )
 
-        if self.pk is None:
-            raise CanNotTranslate(
-                _('Save the instance before creating translations: '
-                  'translations are linked to the object primary key')
-            )
+        self._assert_saved()
 
         # Get translation, if it does not exits create one
         trans_obj = self.get_translation_obj(lang, field, create=True)
@@ -231,18 +233,19 @@ class Translatable:
         key = self._get_translation_cache_key(lang, field)
         cache.set(key, text)
 
-        # check if the field has an autoslugfield and create the translation.
-        # An explicit translation of the slug field itself must win, so the
-        # slug is only regenerated when some other field was translated.
-        if INSTALLED_AUTOSLUG and field != self.translatable_slug:
-            if self.translatable_slug:
-                try:
-                    slug_field = self._meta.get_field(self.translatable_slug)
-                    auto_slug_obj = slug_field.title_field
-                except AttributeError:
-                    pass
+        # check if the field has an autoslugfield and, if the field just
+        # translated is the slug's *source* field, regenerate the slug
+        # translation from it. An explicit translation of the slug field
+        # itself is never overwritten, because only the source field
+        # triggers regeneration.
+        if INSTALLED_AUTOSLUG and self.translatable_slug:
+            try:
+                slug_field = self._meta.get_field(self.translatable_slug)
+                auto_slug_obj = slug_field.title_field
+            except AttributeError:
+                pass
 
-        if auto_slug_obj:
+        if auto_slug_obj and field == auto_slug_obj:
             tobj = self.get_translation_obj(lang, self.translatable_slug, create=True)
             translation = self.get_translation(lang, auto_slug_obj)
             tobj.translation = slugify(translation)
@@ -268,7 +271,7 @@ class Translatable:
         )
 
         object_type = ContentType.objects.get_for_model(self)
-        link += f'?content_type__id__exact={object_type.id}&object_id={self.id}'
+        link += f'?content_type__id__exact={object_type.id}&object_id={self.pk}'
         return format_html('<a href="{}">translate</a>', link)
 
     translations_link.short_description = 'Translations'
@@ -280,13 +283,24 @@ class Translatable:
         """
         return getattr(settings, 'KLINGON_DEFAULT_LANGUAGE', '')
 
+    def _assert_saved(self):
+        """
+        Raise CanNotTranslate if this instance has not been saved yet;
+        translations are linked to the object's primary key.
+        """
+        if self.pk is None:
+            raise CanNotTranslate(
+                _('Save the instance before creating translations: '
+                  'translations are linked to the object primary key')
+            )
+
     def _get_translations_cache_key(self, lang):
         # label_lower is app-qualified, so equally-named models in
         # different apps can not collide on cache keys
         return f'{self._meta.label_lower}:{self.pk}:{lang}'
 
     def _get_translation_cache_key(self, lang, field):
-        return f'{self._meta.label_lower}:{self.pk}:{lang}:{field}'
+        return f'{self._get_translations_cache_key(lang)}:{field}'
 
 
 class AutomaticTranslation(Translatable):

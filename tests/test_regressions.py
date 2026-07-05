@@ -67,3 +67,15 @@ class ExplicitSlugTranslationTestCase(TestCase):
         self.library.set_translation('es', 'slug', 'mi-slug-custom')
         db_value = Translation.objects.get(lang='es', field='slug').translation
         self.assertEqual(self.library.get_translation('es', 'slug'), db_value)
+
+    def test_explicit_slug_survives_unrelated_field_translation(self):
+        # Bug: the old gate regenerated the slug whenever the field being
+        # set was merely "not the slug", so translating an unrelated field
+        # (description, which is not the slug's source field) clobbered an
+        # explicit slug override.
+        self.library.set_translation('es', 'slug', 'mi-slug-custom')
+        self.library.set_translation('es', 'description', 'Todo en ebooks')
+
+        db_value = Translation.objects.get(lang='es', field='slug').translation
+        self.assertEqual(db_value, 'mi-slug-custom')
+        self.assertEqual(self.library.get_translation('es', 'slug'), db_value)

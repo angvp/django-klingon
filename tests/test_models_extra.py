@@ -8,7 +8,7 @@ from django.urls import reverse
 from django.utils.html import escape
 from django.utils.text import slugify
 
-from klingon.models import CanNotTranslate, Translation
+from klingon.models import CanNotTranslate, Translatable, Translation
 
 from .testapp.models import Book, Library
 
@@ -182,4 +182,59 @@ class UnsavedInstanceGuardTestCase(TestCase):
             CanNotTranslate,
             book.set_translation,
             'es', 'title', 'x',
+        )
+
+    def test_get_translation_obj_create_raises_for_unsaved_instance(self):
+        book = Book()
+
+        self.assertRaises(
+            CanNotTranslate,
+            book.get_translation_obj,
+            'es', 'title', True,
+        )
+
+    def test_get_translation_no_cache_bleed_between_unsaved_instances(self):
+        book_a = Book(title='Alpha')
+        book_b = Book(title='Beta')
+
+        self.assertEqual(book_a.get_translation('es', 'title'), 'Alpha')
+        self.assertEqual(book_b.get_translation('es', 'title'), 'Beta')
+        # calling again (order reversed) must still be instance-specific
+        self.assertEqual(book_b.get_translation('es', 'title'), 'Beta')
+        self.assertEqual(book_a.get_translation('es', 'title'), 'Alpha')
+
+        self.assertEqual(Translation.objects.count(), 0)
+
+    def test_translations_no_cache_bleed_between_unsaved_instances(self):
+        book_a = Book(title='Alpha')
+        book_b = Book(title='Beta')
+
+        self.assertEqual(book_a.translations('es')['title'], 'Alpha')
+        self.assertEqual(book_b.translations('es')['title'], 'Beta')
+
+        self.assertEqual(Translation.objects.count(), 0)
+
+
+class AllTranslatableFieldsMutationTestCase(TestCase):
+    """
+    Bug: _all_translatable_fields() aliased a list-typed translatable_fields
+    class attribute and mutated it in place via `+=`.
+    """
+
+    def tearDown(self):
+        cache.clear()
+
+    def test_list_translatable_fields_not_mutated(self):
+        class LocalTranslatable(Translatable):
+            translatable_fields = ['title', 'description']
+            translatable_slug = 'slug'
+
+        instance = LocalTranslatable()
+
+        instance._all_translatable_fields()
+        instance._all_translatable_fields()
+
+        self.assertEqual(
+            LocalTranslatable.translatable_fields,
+            ['title', 'description'],
         )
